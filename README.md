@@ -22,11 +22,11 @@ To get spun up follow these steps.
 
 1. Clone the repo and install dependencies.
    ```bash
-   git clone https://github.com/portal-hq/portal-hackathon-kit-web
+   git clone https://github.com/ripe-money/portal-hackathon-kit-web.git
    cd portal-hackathon-kit-web
    yarn
    ```
-2. Paste your Portal Client API Key into the `next.config.mjs` file.
+2. Copy `.env.example` into a new file `.env.local`. Paste your Portal Client API Key into the `.env.local` file.
 3. Run the example app.
    ```bash
    yarn dev
