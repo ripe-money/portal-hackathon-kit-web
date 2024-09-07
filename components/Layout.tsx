@@ -32,10 +32,6 @@ const DRAWER_ITEMS = [
     name: 'Send Tokens',
     link: '/send',
   },
-  {
-    name: 'Scanner',
-    link: '/scan',
-  },
 ];
 
 const DrawerHeader = styled('div')(({ theme }) => ({
@@ -83,6 +79,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         message: `Something went wrong - ${e}`,
       });
     } finally {
+      snackbar.setSnackbarOpen(false);
       setGeneratingSolanaAddress(false);
     }
   };

@@ -151,6 +151,7 @@ export default function Home() {
                       message: `Something went wrong - ${e}`,
                     });
                   } finally {
+                    snackbar.setSnackbarOpen(false);
                     setTxnOngoing(false);
                   }
                 }}

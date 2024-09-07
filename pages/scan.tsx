@@ -1,26 +1,12 @@
-import { Button } from '@mui/material';
-import { usePay, QRScanner } from '../providers/PayContext';
-import { Pending, Send } from '@mui/icons-material';
-import React, { useState } from 'react';
+import { usePay, PayUI } from '../providers/PayContext';
+import React from 'react';
 
 const Scan = () => {
-  const { pay, decode } = usePay();
-  const [paying] = useState(false);
+  const payCrypto = usePay();
 
   return (
     <div>
-      <QRScanner decode={decode} />
-      <Button
-        color="inherit"
-        variant="outlined"
-        onClick={async () => {
-          if (!pay) return;
-          pay();
-        }}
-        endIcon={paying ? <Pending /> : <Send />}
-      >
-        Pay
-      </Button>
+      <PayUI payCrypto={payCrypto} />
     </div>
   );
 };

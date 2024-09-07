@@ -1,11 +1,12 @@
+'use client';
+
 import React from 'react';
-import { Box, Fab, IconButton } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
-import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { Box, Fab } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import { useRouter } from 'next/navigation';
 
 export default function BottomNavBar() {
+  const router = useRouter();
   return (
     <Box sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}>
       <Box
@@ -46,20 +47,14 @@ export default function BottomNavBar() {
             },
             zIndex: 1,
           }}
+          onClick={() => {
+            router.push('/scan');
+          }}
         >
           <AddIcon />
         </Fab>
         {/* Bottom Navigation Icons */}
-        <IconButton sx={{ color: 'white' }}>
-          <HomeIcon />
-        </IconButton>
-        <IconButton sx={{ color: 'white' }}>
-          <FileDownloadIcon />
-        </IconButton>
         <Box sx={{ width: '70px' }} /> {/* Spacer for FAB */}
-        <IconButton sx={{ color: 'white' }}>
-          <MoreVertIcon />
-        </IconButton>
       </Box>
     </Box>
   );
