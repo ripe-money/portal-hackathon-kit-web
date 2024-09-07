@@ -20,6 +20,7 @@ import { Button, Container, InputAdornment, TextField } from '@mui/material';
 import { usePortal } from '@/providers/portal';
 import { ContentCopy, Pending, Send } from '@mui/icons-material';
 import { useSnackbar } from '@/providers/snackbar';
+import BottomNavBar from './BottomNavBar';
 
 const DRAWER_WIDTH = 240;
 const DRAWER_ITEMS = [
@@ -30,6 +31,10 @@ const DRAWER_ITEMS = [
   {
     name: 'Send Tokens',
     link: '/send',
+  },
+  {
+    name: 'Scanner',
+    link: '/scan',
   },
 ];
 
@@ -174,7 +179,12 @@ export default function Layout({ children }: { children: ReactNode }) {
           <List>
             {DRAWER_ITEMS.map((item, index) => (
               <ListItem key={index} disablePadding>
-                <ListItemButton onClick={() => router.push(item.link)}>
+                <ListItemButton
+                  onClick={() => {
+                    router.push(item.link);
+                    handleDrawerClose();
+                  }}
+                >
                   <ListItemText primary={item.name} />
                 </ListItemButton>
               </ListItem>
@@ -186,6 +196,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           {children}
         </Container>
       </Container>
+      <BottomNavBar />
     </Box>
   );
 }

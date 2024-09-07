@@ -132,12 +132,13 @@ export default function Home() {
                 onClick={async () => {
                   try {
                     setTxnOngoing(true);
+                    console.log(to, tokenMint, tokenAmount);
                     const hash = await portal.sendTokensOnSolana(
                       to,
                       tokenMint,
                       tokenAmount,
                     );
-
+                    console.log('Sent token: ', hash);
                     snackbar.setSnackbarOpen(true);
                     snackbar.setSnackbarContent({
                       severity: 'success',

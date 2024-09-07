@@ -1,0 +1,47 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "next",
+    "plugin:react/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "plugins": ["react", "prettier", "import"],
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "rules": {
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "error",
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": "off",
+    "semi": ["error", "always"],
+    "space-before-blocks": ["error", "always"],
+    "newline-before-return": "off",
+    "prettier/prettier": "error",
+    "import/order": "off",
+    "import/newline-after-import": "error",
+    "import/no-duplicates": "error",
+    "no-console": "warn",
+    "no-debugger": "error",
+    "eqeqeq": ["error", "always"],
+    "curly": "off",
+    "no-else-return": ["error", { "allowElseIf": false }],
+    "prefer-const": "error",
+    "no-var": "off",
+    "no-duplicate-imports": "error",
+    "arrow-body-style": ["error", "as-needed"]
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  }
+}
