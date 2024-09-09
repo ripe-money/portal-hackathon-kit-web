@@ -1,4 +1,4 @@
-import { ITokenBalance, usePortal } from '@/providers/portal';
+import { ITokenBalance, usePortal } from 'portal-sol-pay-package';
 import {
   Box,
   Button,

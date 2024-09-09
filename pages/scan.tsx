@@ -1,4 +1,4 @@
-import { usePay, PayUI } from '../providers/PayContext';
+import { usePay, PayUI } from 'portal-sol-pay-package';
 import React from 'react';
 
 const Scan = () => {
