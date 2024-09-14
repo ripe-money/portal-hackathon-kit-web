@@ -19,17 +19,20 @@ import {
   TextField,
 } from '@mui/material';
 import { Cancel, Pending, Send } from '@mui/icons-material';
+import crypto from 'crypto';
 
-const PYUSDAddress = 'CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM';
-
+const PYUSDAddress =
+  process.env.pyUsdMint || 'CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM';
+const MemoPrefix = 'Ripe:';
+type PayType = 'SOLANA_ADDRESS' | 'SOLANA_PAY' | 'RIPE_FIAT' | null;
 interface PaymentInfo {
   chainId: string;
   to: string;
   from: string;
   tokenAddress: string;
   tokenAmount: number;
-  payType: 'SOLANA_ADDRESS' | 'SOLANA_PAY' | 'RIPE_FIAT' | null;
-  memo?: string;
+  payType: PayType;
+  memo: string;
   hash: string;
   pay: () => void;
   decode: (rawQRData: string) => void;
@@ -43,6 +46,7 @@ interface PaymentInfo {
     memo?: string;
     fiatAmount?: number;
   }) => void;
+  getPaymentTransactions: () => void;
 }
 
 interface FiatInfo {
@@ -51,6 +55,12 @@ interface FiatInfo {
   netsAcc?: string;
   uen?: string;
   phoneNumber?: string;
+}
+
+interface MemoInfo {
+  description: string;
+  payType: PayType;
+  fiatInfo?: FiatInfo;
 }
 
 interface PaymentUIState extends PaymentInfo, FiatInfo {
@@ -70,6 +80,7 @@ const initialState: PaymentUIState = {
   isPayingLoading: false,
   pay: () => {},
   decode: (rawQRData: string) => {},
+  getPaymentTransactions: () => {},
 };
 
 type ACTIONTYPE =
@@ -110,10 +121,6 @@ function PayProvider({ children }: { children: React.ReactNode }) {
   const portal = usePortal();
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  useEffect(() => {
-    console.log({ ...state });
-  }, [state]);
-
   async function reset() {
     dispatch({
       type: 'initiate',
@@ -124,7 +131,7 @@ function PayProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function pay() {
-    if (!state) return;
+    if (!state || !process.env.portalClientApiKey) return;
 
     dispatch({
       type: 'pay',
@@ -134,10 +141,19 @@ function PayProvider({ children }: { children: React.ReactNode }) {
       },
     });
 
-    const hash = await portal.sendTokensOnSolana(
+    if (state.payType === 'RIPE_FIAT') return;
+    const memo = constructMemoWithEncryption(
+      state.memo || 'No Memo Provided',
+      process.env.portalClientApiKey,
+    );
+    const hash = await portal.sendTokensOnSolanaWithMemo(
       state.to,
       state.tokenAddress,
       state.tokenAmount,
+      constructMemoWithEncryption(
+        state.memo || 'No Memo Provided',
+        process.env.portalClientApiKey,
+      ),
     );
 
     dispatch({
@@ -148,6 +164,8 @@ function PayProvider({ children }: { children: React.ReactNode }) {
         hash,
       },
     });
+
+    destructureMemoWithDecryption(memo, process.env.portalClientApiKey);
   }
 
   async function updateFields(updatedFields: {
@@ -167,22 +185,7 @@ function PayProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function decode(rawQRData: string) {
-    console.log(rawQRData);
-
     //if it is a solana pay qrcode
-
-    /*
-      solana:
-      GvHeR432g7MjN9uKyX3Dzg66TqwrEWgANLnnFZXMeyyj
-      ?
-      amount=1
-      &
-      spl-token=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
-      &
-      reference=72FrP58fnrD24Fo48jKR2PoyjjaTcKQJHM9inPV6TFGn
-      &
-      label=Solana%20Pay
-    */
 
     if (rawQRData.substring(0, 7) === 'solana:') {
       try {
@@ -226,6 +229,7 @@ function PayProvider({ children }: { children: React.ReactNode }) {
           uen: uen,
           phoneNumber,
           netsAcc: netsAccount,
+          fiatCurrency: 'SGD',
         },
       });
       return;
@@ -247,38 +251,51 @@ function PayProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  function isTransferRequestURL(obj: unknown): obj is TransferRequestURL {
-    return typeof obj === 'object' && obj !== null && 'recipient' in obj;
+  async function getPaymentTransactions() {
+    const transactions = await portal.getAllTransactions();
+    console.log(transactions);
+
+    if (!transactions || transactions.length === 0) return;
   }
 
-  //throw a few examples to ChatGPT to let it generate possible Regex patterns
-  function extractPayNowInfo(payNowString: string): {
-    uen?: string;
-    phoneNumber?: string;
-    netsAccount?: string;
-  } {
-    // Regular expression to capture phone numbers (Singapore numbers usually start with +65)
-    const phoneRegex = /\+65\d{8}/;
-    // Updated UEN regex: Alphanumeric UEN which can be 9 digits followed by a letter or other similar formats
-    const uenRegex = /\b\d{9}[A-Z]|\b\d{10}[A-Z]\b/;
-    // Regular expression to capture NETS account numbers (typically 12 digits separated by spaces)
-    const netsRegex = /\d{6}\s\d{4}\s\d{6}/;
-
-    const phoneNumberMatch = payNowString.match(phoneRegex);
-    const uenMatch = payNowString.match(uenRegex);
-    const netsAccountMatch = payNowString.match(netsRegex);
-
-    return {
-      uen: uenMatch ? uenMatch[0] : undefined,
-      phoneNumber: phoneNumberMatch ? phoneNumberMatch[0] : undefined,
-      netsAccount: netsAccountMatch
-        ? netsAccountMatch[0].replace(/\s/g, '')
-        : undefined, // remove spaces in NETS accounts
+  function constructMemoWithEncryption(description: string, apiKey: string) {
+    const memoInfo: MemoInfo = {
+      description,
+      payType: state.payType,
     };
+    if (state.payType === 'RIPE_FIAT') {
+      memoInfo.fiatInfo = {
+        fiatAmount: state.fiatAmount,
+        fiatCurrency: state.fiatCurrency,
+        netsAcc: state.netsAcc,
+        uen: state.uen,
+        phoneNumber: state.phoneNumber,
+      };
+    }
+    return MemoPrefix + encrypt(JSON.stringify(memoInfo), apiKey);
+  }
+
+  function destructureMemoWithDecryption(memo: string, apiKey: string) {
+    if (!memo.startsWith(MemoPrefix))
+      throw new Error('This is not a payment transaction initiated by Ripe');
+    const memoInfo = JSON.parse(decrypt(memo.substring(5), apiKey));
+    if (!memoInfo?.description || !memoInfo?.payType)
+      throw new Error('This is not a payment transaction initiated by Ripe');
+
+    return memoInfo;
   }
 
   return (
-    <PayContext.Provider value={{ ...state, pay, decode, reset, updateFields }}>
+    <PayContext.Provider
+      value={{
+        ...state,
+        pay,
+        decode,
+        reset,
+        updateFields,
+        getPaymentTransactions,
+      }}
+    >
       {children}
     </PayContext.Provider>
   );
@@ -790,4 +807,88 @@ function PayThroughRipeFiat({ payCrypto }: { payCrypto: PaymentUIState }) {
   );
 }
 
+function encrypt(data: string, apiKey: string) {
+  // Use the API key to create a key for encryption
+  const key = crypto.createHash('sha256').update(apiKey).digest();
+
+  // Create an initialization vector
+  const iv = crypto.randomBytes(16);
+
+  // Create cipher
+  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+
+  // Encrypt the data
+  let encryptedData = cipher.update(data, 'utf8', 'hex');
+  encryptedData += cipher.final('hex');
+
+  // Create a signature
+  const hmac = crypto.createHmac('sha256', key);
+  hmac.update(encryptedData);
+  const signature = hmac.digest('hex');
+
+  // Combine IV, encrypted data, and signature
+  return iv.toString('hex') + ':' + encryptedData + ':' + signature;
+}
+
+function decrypt(data: string, apiKey: string) {
+  // Split the encrypted memo into its components
+  const [ivHex, encryptedData, signature] = data.split(':');
+
+  // Use the API key to recreate the encryption key
+  const key = crypto.createHash('sha256').update(apiKey).digest();
+
+  // Verify the signature
+  const hmac = crypto.createHmac('sha256', key);
+  hmac.update(encryptedData);
+  const computedSignature = hmac.digest('hex');
+
+  if (computedSignature !== signature) {
+    throw new Error(
+      'Signature verification failed. The data may have been tampered with.',
+    );
+  }
+
+  // Recreate the IV
+  const iv = Buffer.from(ivHex, 'hex');
+
+  // Create decipher
+  const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+
+  // Decrypt the data
+  let decryptedData = decipher.update(encryptedData, 'hex', 'utf8');
+  decryptedData += decipher.final('utf8');
+
+  // Parse the JSON data
+  return decryptedData;
+}
+
+//throw a few examples to ChatGPT to let it generate possible Regex patterns
+function extractPayNowInfo(payNowString: string): {
+  uen?: string;
+  phoneNumber?: string;
+  netsAccount?: string;
+} {
+  // Regular expression to capture phone numbers (Singapore numbers usually start with +65)
+  const phoneRegex = /\+65\d{8}/;
+  // Updated UEN regex: Alphanumeric UEN which can be 9 digits followed by a letter or other similar formats
+  const uenRegex = /\b\d{9}[A-Z]|\b\d{10}[A-Z]\b/;
+  // Regular expression to capture NETS account numbers (typically 12 digits separated by spaces)
+  const netsRegex = /\d{6}\s\d{4}\s\d{6}/;
+
+  const phoneNumberMatch = payNowString.match(phoneRegex);
+  const uenMatch = payNowString.match(uenRegex);
+  const netsAccountMatch = payNowString.match(netsRegex);
+
+  return {
+    uen: uenMatch ? uenMatch[0] : undefined,
+    phoneNumber: phoneNumberMatch ? phoneNumberMatch[0] : undefined,
+    netsAccount: netsAccountMatch
+      ? netsAccountMatch[0].replace(/\s/g, '')
+      : undefined, // remove spaces in NETS accounts
+  };
+}
+
+function isTransferRequestURL(obj: unknown): obj is TransferRequestURL {
+  return typeof obj === 'object' && obj !== null && 'recipient' in obj;
+}
 export { PayProvider, usePay, PayUI };

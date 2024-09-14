@@ -143,8 +143,7 @@ export default function Home() {
                 onClick={async () => {
                   try {
                     setTxnOngoing(true);
-                    console.log(to, tokenMint, tokenAmount);
-                    const hash = await portal.sendTokensOnSolana(
+                    const hash = await portal.sendTokensOnSolanaWithMemo(
                       to,
                       tokenMint,
                       tokenAmount,
