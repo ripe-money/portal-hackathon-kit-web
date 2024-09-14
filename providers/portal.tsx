@@ -1,14 +1,18 @@
+/* eslint-disable no-unsafe-finally */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as React from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 import Portal from '@portal-hq/web';
 import pyusdThumb from '../public/pyusd.png';
 import solanaThumb from '../public/solana.png';
 import {
+  ConfirmedSignatureInfo,
+  Connection,
+  ParsedTransactionWithMeta,
   PublicKey,
   Transaction,
   TransactionInstruction,
 } from '@solana/web3.js';
-import { Transaction as PortalTransaction } from '@portal-hq/web/types';
 
 export interface ITokenBalance {
   balance: string;
@@ -31,7 +35,9 @@ interface IPortalContext {
     tokenAmount: number,
     memo?: string,
   ) => Promise<string>;
-  getAllTransactions: () => Promise<PortalTransaction[]>;
+  getAllTransactions: () => Promise<
+    (ParsedTransactionWithMeta | null)[] | undefined
+  >;
 }
 
 const PortalContext = createContext<IPortalContext>({} as IPortalContext);
@@ -170,12 +176,41 @@ export const PortalProvider: React.FC<{ children: React.ReactNode }> = ({
         async getAllTransactions() {
           if (!portal || !portal?.ready)
             throw new Error('Portal has not initialised');
+          const address = await portal.getSolanaAddress();
 
-          const transactions = portal.getTransactions(
-            process.env.solanaChainId!,
-          );
+          if (!process.env.solanaRpcUrl || !address) return;
 
-          return transactions;
+          const connection = new Connection(process.env.solanaRpcUrl);
+
+          const pubKey = new PublicKey(address);
+          let transactionList: (ParsedTransactionWithMeta | null)[] = [];
+
+          try {
+            // Get the list of signatures
+            const signatures = await connection.getSignaturesForAddress(pubKey);
+            // Fetch transactions one by one
+            for (let i = 0; i < signatures.length; i++) {
+              const tx = await connection.getParsedTransaction(
+                signatures[i].signature,
+                {
+                  maxSupportedTransactionVersion: 0,
+                },
+              );
+              transactionList.push(tx);
+              console.log(
+                `Fetched transaction ${i + 1} of ${signatures.length}`,
+              );
+            }
+
+            // Filter out any null transactions
+            transactionList = transactionList.filter(
+              (tx): tx is ParsedTransactionWithMeta => tx !== null,
+            );
+            return transactionList;
+          } catch (error) {
+            console.error('Error fetching transactions:', error);
+          }
+          return [];
         },
       }}
     >

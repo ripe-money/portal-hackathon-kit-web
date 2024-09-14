@@ -32,6 +32,10 @@ const DRAWER_ITEMS = [
     name: 'Send Tokens',
     link: '/send',
   },
+  {
+    name: 'View All Payments',
+    link: '/payments',
+  },
 ];
 
 const DrawerHeader = styled('div')(({ theme }) => ({

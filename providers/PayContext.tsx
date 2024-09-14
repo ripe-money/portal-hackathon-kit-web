@@ -20,6 +20,7 @@ import {
 } from '@mui/material';
 import { Cancel, Pending, Send } from '@mui/icons-material';
 import crypto from 'crypto';
+import { ParsedInstruction, ParsedTransactionWithMeta } from '@solana/web3.js';
 
 const PYUSDAddress =
   process.env.pyUsdMint || 'CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM';
@@ -65,6 +66,11 @@ interface MemoInfo {
 
 interface PaymentUIState extends PaymentInfo, FiatInfo {
   isPayingLoading: boolean;
+}
+
+interface PaymentTransaction {
+  memoInfo: MemoInfo;
+  transaction: ParsedTransactionWithMeta;
 }
 
 const initialState: PaymentUIState = {
@@ -252,10 +258,42 @@ function PayProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function getPaymentTransactions() {
-    const transactions = await portal.getAllTransactions();
-    console.log(transactions);
+    if (!process.env.portalClientApiKey) return [];
 
-    if (!transactions || transactions.length === 0) return;
+    const paymentTransactions: PaymentTransaction[] = [];
+
+    const transactions = await portal.getAllTransactions();
+    if (!transactions || transactions.length === 0) return [];
+
+    for (let i = 0; i < transactions?.length; i++) {
+      const tx = transactions[i];
+      if (!tx) continue;
+      const instructions = tx.transaction.message.instructions;
+      if (!instructions || instructions.length === 0) continue;
+
+      for (let j = 0; j < instructions.length; j++) {
+        const instruction = instructions[j];
+
+        if (!isParsedInstruction(instruction)) continue;
+
+        const memoEncodedText = instruction.parsed;
+        const memoInfo = destructureMemoWithDecryption(
+          memoEncodedText,
+          process.env.portalClientApiKey,
+        );
+
+        if (!memoInfo) continue;
+
+        if ('description' in memoInfo) {
+          paymentTransactions.push({
+            memoInfo,
+            transaction: tx,
+          });
+        }
+      }
+    }
+
+    return paymentTransactions;
   }
 
   function constructMemoWithEncryption(description: string, apiKey: string) {
@@ -276,13 +314,20 @@ function PayProvider({ children }: { children: React.ReactNode }) {
   }
 
   function destructureMemoWithDecryption(memo: string, apiKey: string) {
-    if (!memo.startsWith(MemoPrefix))
-      throw new Error('This is not a payment transaction initiated by Ripe');
-    const memoInfo = JSON.parse(decrypt(memo.substring(5), apiKey));
-    if (!memoInfo?.description || !memoInfo?.payType)
-      throw new Error('This is not a payment transaction initiated by Ripe');
+    try {
+      if (!memo || typeof memo !== 'string') return null;
+      if (!memo.startsWith(MemoPrefix))
+        throw new Error('This is not a payment transaction initiated by Ripe');
+      const memoInfo = JSON.parse(decrypt(memo.substring(5), apiKey));
+      if (!memoInfo?.description || !memoInfo?.payType)
+        throw new Error('This is not a payment transaction initiated by Ripe');
 
-    return memoInfo;
+      return memoInfo;
+    } catch (error) {
+      console.error(error);
+    } finally {
+      return null;
+    }
   }
 
   return (
@@ -891,4 +936,14 @@ function extractPayNowInfo(payNowString: string): {
 function isTransferRequestURL(obj: unknown): obj is TransferRequestURL {
   return typeof obj === 'object' && obj !== null && 'recipient' in obj;
 }
+
+function isParsedInstruction(obj: unknown): obj is ParsedInstruction {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'program' in obj &&
+    'parsed' in obj
+  );
+}
+
 export { PayProvider, usePay, PayUI };

@@ -19,6 +19,7 @@ export default function Home() {
     try {
       setIsLoading(true);
       const txns = payCrypto.getPaymentTransactions();
+      console.log(txns);
       // setTransactions(txns);
     } catch (e) {
       snackbar.setSnackbarOpen(true);
