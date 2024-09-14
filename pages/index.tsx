@@ -86,7 +86,7 @@ export default function Home() {
                 ? tokens
                     .map((token, idx) => {
                       return (
-                        <ListItem key={idx}>
+                        <ListItem key={token + '_' + idx}>
                           <ListItemAvatar>
                             <Avatar
                               alt={token.symbol}
