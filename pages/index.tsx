@@ -46,13 +46,24 @@ export default function Home() {
   }, [portal.ready]);
 
   return (
-    <Box>
+    <Box
+      sx={{
+        p: 4,
+        display: 'flex',
+        justifyContent: 'center',
+        placeItems: 'start',
+        minHeight: '70vh',
+        background: 'white',
+        borderRadius: '20px',
+      }}
+    >
       <Container maxWidth="lg">
         <Box
           sx={{
             p: 4,
             display: 'flex',
             justifyContent: 'center',
+            placeItems: 'start',
           }}
         >
           <Typography fontSize={{ xs: 12, md: 16 }}>

@@ -18,6 +18,7 @@
     "@mui/styled-engine-sc": "^6.0.0-alpha.18",
     "@portal-hq/web": "^3.2.0",
     "@solana/pay": "^0.2.5",
+    "@solana/spl-token": "^0.4.8",
     "@solana/web3.js": "^1.95.3",
     "@yudiel/react-qr-scanner": "^2.0.8",
     "bignumber.js": "^9.1.2",

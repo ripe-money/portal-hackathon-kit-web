@@ -126,7 +126,6 @@ function PayProvider({ children }: { children: React.ReactNode }) {
   async function pay() {
     if (!state) return;
 
-    console.log('here');
     dispatch({
       type: 'pay',
       payload: {
@@ -314,12 +313,39 @@ function QRScanner({ decode }: { decode?: (rawQRData: string) => void }) {
 
     decode(result?.[0].rawValue || '');
   }
-  return <Scanner onScan={(result) => handleOnScan(result)} />;
+  return (
+    <Box
+      sx={{
+        width: '100%',
+        maxWidth: '580px',
+        position: 'relative',
+      }}
+    >
+      <Typography
+        sx={{
+          position: 'absolute',
+          right: '35px',
+          bottom: '10px',
+          zIndex: 10,
+          fontSize: {
+            xs: '10px',
+            sm: '12px',
+          },
+          color: '#8B6A00',
+          fontWeight: 'bold',
+          fontFamily: 'fantasy',
+        }}
+      >
+        Powered by @Ripe
+      </Typography>
+      <Scanner onScan={(result) => handleOnScan(result)} />
+    </Box>
+  );
 }
 
 function PayThroughSolana_Pay({ payCrypto }: { payCrypto: PaymentUIState }) {
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 3, background: 'white', borderRadius: '20px' }}>
       <Box display="flex" justifyContent="left" alignItems="center" mb={2}>
         <Typography variant="h5" align="center" gutterBottom>
           Solana Pay Transaction Request
@@ -441,7 +467,7 @@ function PayThroughSolanaTransfer({
 }) {
   return (
     <div>
-      <Box sx={{ p: 3 }}>
+      <Box sx={{ p: 3, background: 'white', borderRadius: '20px' }}>
         {/* Header for the form */}
         <Typography variant="h5" gutterBottom>
           Solana Address Transfer
@@ -571,8 +597,7 @@ function PayThroughRipeFiat({ payCrypto }: { payCrypto: PaymentUIState }) {
 
   return (
     <div>
-      <Box sx={{ p: 3 }}>
-        {/* Header for the form */}
+      <Box sx={{ p: 3, background: 'white', borderRadius: '20px' }}>
         <Typography variant="h5" gutterBottom>
           Pay Fiat using @Ripe
         </Typography>

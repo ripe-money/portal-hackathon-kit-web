@@ -6,6 +6,8 @@ export default function Document() {
     <Html lang="en">
       <Head />
       <body>
+        <div className="circle"></div>
+        <div className="circle"></div>
         <Main />
         <NextScript />
       </body>

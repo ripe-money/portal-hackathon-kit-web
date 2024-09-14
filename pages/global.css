@@ -1,0 +1,77 @@
+html {
+  height: 100vh;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(270deg, #1c170c, #2a2415);
+  background-size: 600% 600%;
+  animation: gradientMove 10s ease infinite;
+  overflow: hidden;
+}
+
+.circle {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-color: white;
+  animation: bounce 42s ease-in-out infinite;
+}
+
+.circle:nth-child(2) {
+  background-color: #ffc107;
+  animation: bounce2 32s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0% {
+    transform: translate(-60vw, -50vh);
+  }
+  25% {
+    transform: translate(30vw, -10vh);
+  }
+  50% {
+    transform: translate(-40vw, 50vh);
+  }
+  75% {
+    transform: translate(20vw, -30vh);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes bounce2 {
+  0% {
+    transform: translate(20vw, 80vh);
+  }
+  25% {
+    transform: translate(-20vw, 30vh);
+  }
+  50% {
+    transform: translate(40vw, -40vh);
+  }
+  75% {
+    transform: translate(-30vw, 20vh);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
