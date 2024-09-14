@@ -1,15 +1,9 @@
 /* eslint-disable no-unsafe-finally */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, {
-  useContext,
-  createContext,
-  useReducer,
-  useEffect,
-  useState,
-} from 'react';
+import React, { useContext, createContext, useReducer } from 'react';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { usePortal } from './portal';
-import { parseURL, TransferRequestURL } from '@solana/pay';
+import { parseURL } from '@solana/pay';
 import {
   Grid,
   Typography,
@@ -18,15 +12,27 @@ import {
   CircularProgress,
   TextField,
 } from '@mui/material';
-import { Cancel, Pending, Send } from '@mui/icons-material';
-import crypto from 'crypto';
-import { ParsedInstruction, ParsedTransactionWithMeta } from '@solana/web3.js';
+import { Cancel, Send } from '@mui/icons-material';
+import { ParsedTransactionWithMeta } from '@solana/web3.js';
+import {
+  encrypt,
+  decrypt,
+  extractPayNowInfo,
+  isTransferRequestURL,
+  isParsedInstruction,
+} from './utils/helperFunctions';
+import {
+  PayThroughSolana_Pay,
+  PayThroughSolanaTransfer,
+  PayThroughRipeFiat,
+  QRScanner,
+} from './utils/payUI';
 
 const PYUSDAddress =
   process.env.pyUsdMint || 'CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM';
 const MemoPrefix = 'Ripe:';
 type PayType = 'SOLANA_ADDRESS' | 'SOLANA_PAY' | 'RIPE_FIAT' | null;
-interface PaymentInfo {
+export interface PaymentInfo {
   chainId: string;
   to: string;
   from: string;
@@ -47,10 +53,10 @@ interface PaymentInfo {
     memo?: string;
     fiatAmount?: number;
   }) => void;
-  getPaymentTransactions: () => void;
+  getPaymentTransactions: () => Promise<PaymentTransaction[]>;
 }
 
-interface FiatInfo {
+export interface FiatInfo {
   fiatAmount?: number;
   fiatCurrency?: 'SGD' | 'PESO' | 'IDR' | 'BHT';
   netsAcc?: string;
@@ -58,17 +64,17 @@ interface FiatInfo {
   phoneNumber?: string;
 }
 
-interface MemoInfo {
+export interface MemoInfo {
   description: string;
   payType: PayType;
   fiatInfo?: FiatInfo;
 }
 
-interface PaymentUIState extends PaymentInfo, FiatInfo {
+export interface PaymentUIState extends PaymentInfo, FiatInfo {
   isPayingLoading: boolean;
 }
 
-interface PaymentTransaction {
+export interface PaymentTransaction {
   memoInfo: MemoInfo;
   transaction: ParsedTransactionWithMeta;
 }
@@ -86,7 +92,7 @@ const initialState: PaymentUIState = {
   isPayingLoading: false,
   pay: () => {},
   decode: (rawQRData: string) => {},
-  getPaymentTransactions: () => {},
+  getPaymentTransactions: () => Promise.resolve([]),
 };
 
 type ACTIONTYPE =
@@ -367,584 +373,6 @@ function PayUI({ payCrypto }: { payCrypto: PaymentUIState }) {
     default:
       return <QRScanner decode={payCrypto.decode} />;
   }
-}
-
-function QRScanner({ decode }: { decode?: (rawQRData: string) => void }) {
-  // @ts-expect-error unsure what type is expected
-  function handleOnScan(result) {
-    if (!decode) return;
-
-    decode(result?.[0].rawValue || '');
-  }
-  return (
-    <Box
-      sx={{
-        width: '100%',
-        maxWidth: '580px',
-        position: 'relative',
-      }}
-    >
-      <Typography
-        sx={{
-          position: 'absolute',
-          right: '35px',
-          bottom: '10px',
-          zIndex: 10,
-          fontSize: {
-            xs: '10px',
-            sm: '12px',
-          },
-          color: '#8B6A00',
-          fontWeight: 'bold',
-          fontFamily: 'fantasy',
-        }}
-      >
-        Powered by @Ripe
-      </Typography>
-      <Scanner onScan={(result) => handleOnScan(result)} />
-    </Box>
-  );
-}
-
-function PayThroughSolana_Pay({ payCrypto }: { payCrypto: PaymentUIState }) {
-  return (
-    <Box sx={{ p: 3, background: 'white', borderRadius: '20px' }}>
-      <Box display="flex" justifyContent="left" alignItems="center" mb={2}>
-        <Typography variant="h5" align="center" gutterBottom>
-          Solana Pay Transaction Request
-        </Typography>
-        <img
-          src="/solanapay-logo.svg"
-          alt="solana pay logo"
-          style={{ marginLeft: '8px' }}
-        />
-      </Box>
-
-      <Grid container spacing={2}>
-        {/* Send To Address */}
-        <Grid item xs={12}>
-          <Typography variant="h6" gutterBottom>
-            Send To Address:
-          </Typography>
-          <Typography
-            variant="body1"
-            style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}
-          >
-            {payCrypto.to}
-          </Typography>
-        </Grid>
-
-        {/* Token (Icon, name, address) */}
-        <Grid item xs={12}>
-          <Typography variant="h6" gutterBottom>
-            Token:
-          </Typography>
-          <Typography
-            variant="body1"
-            style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}
-          >
-            <img
-              src="/pyusd.png"
-              alt="PYUSD"
-              style={{ width: '24px', marginRight: '8px' }}
-            />
-            {'PYUSD'} ({payCrypto.tokenAddress})
-          </Typography>
-        </Grid>
-
-        {/* Token Amount */}
-        <Grid item xs={12}>
-          <Typography variant="h6" gutterBottom>
-            Token Amount:
-          </Typography>
-          <Typography variant="body1">{payCrypto.tokenAmount}</Typography>
-        </Grid>
-
-        {/* Memo */}
-        <Grid item xs={12}>
-          <Typography variant="h6" gutterBottom>
-            Memo:
-          </Typography>
-          <Typography
-            variant="body1"
-            style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}
-          >
-            {payCrypto.memo || 'No memo provided'}
-          </Typography>
-        </Grid>
-
-        {/* Transaction Hash */}
-        {payCrypto.hash && (
-          <Grid item xs={12}>
-            <Typography variant="h6" gutterBottom>
-              Transaction Hash:
-            </Typography>
-            <Typography
-              variant="body1"
-              style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}
-            >
-              {payCrypto.hash}
-            </Typography>
-          </Grid>
-        )}
-
-        <Grid item xs={12}>
-          <Box display="flex" gap={2}>
-            <Button
-              color="inherit"
-              variant="contained"
-              onClick={async () => {
-                payCrypto.pay();
-              }}
-              endIcon={
-                payCrypto.isPayingLoading ? (
-                  <CircularProgress size={24} color="inherit" />
-                ) : (
-                  <Send />
-                )
-              }
-            >
-              {payCrypto.isPayingLoading ? 'Paying' : 'Pay'}
-            </Button>
-            <Button
-              color="inherit"
-              variant="contained"
-              onClick={async () => {
-                if (payCrypto.reset) payCrypto.reset();
-              }}
-              endIcon={<Cancel />}
-            >
-              Cancel
-            </Button>
-          </Box>
-        </Grid>
-      </Grid>
-    </Box>
-  );
-}
-
-function PayThroughSolanaTransfer({
-  payCrypto,
-}: {
-  payCrypto: PaymentUIState;
-}) {
-  return (
-    <div>
-      <Box sx={{ p: 3, background: 'white', borderRadius: '20px' }}>
-        {/* Header for the form */}
-        <Typography variant="h5" gutterBottom>
-          Solana Address Transfer
-        </Typography>
-
-        <Grid container spacing={2}>
-          {/* First row: Send To Address (Non-editable) */}
-          <Grid item xs={12}>
-            <Typography variant="h6" gutterBottom>
-              Send To Address:
-            </Typography>
-            <Typography variant="body1" sx={{ wordWrap: 'break-word' }}>
-              {payCrypto.to}
-            </Typography>
-          </Grid>
-
-          {/* Token (Icon, name, address) */}
-          <Grid item xs={12}>
-            <Typography variant="h6" gutterBottom>
-              Token:
-            </Typography>
-            <Typography
-              variant="body1"
-              style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}
-            >
-              <img
-                src="/pyusd.png"
-                alt="PYUSD"
-                style={{ width: '24px', marginRight: '8px' }}
-              />
-              {'PYUSD'} ({payCrypto.tokenAddress})
-            </Typography>
-          </Grid>
-
-          {/* Token Amount */}
-          <Grid item xs={12}>
-            <TextField
-              label="Token Amount"
-              variant="outlined"
-              fullWidth
-              type="number"
-              name="tokenAmount"
-              value={payCrypto.tokenAmount}
-              onChange={(e) =>
-                payCrypto.updateFields &&
-                payCrypto.updateFields({
-                  tokenAmount: Number(e.target.value || 0),
-                  fiatAmount: payCrypto.fiatAmount,
-                  memo: payCrypto.memo,
-                })
-              }
-            />
-          </Grid>
-
-          {/* Memo */}
-          <Grid item xs={12}>
-            <TextField
-              label="Memo"
-              variant="outlined"
-              fullWidth
-              name="memo"
-              value={payCrypto.memo}
-              onChange={(e) =>
-                payCrypto.updateFields &&
-                payCrypto.updateFields({
-                  memo: e.target.value,
-                  fiatAmount: payCrypto.fiatAmount,
-                  tokenAmount: payCrypto.tokenAmount,
-                })
-              }
-            />
-          </Grid>
-
-          {/* Transaction Hash */}
-          {payCrypto.hash && (
-            <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom>
-                Transaction Hash:
-              </Typography>
-              <Typography
-                variant="body1"
-                style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}
-              >
-                {payCrypto.hash}
-              </Typography>
-            </Grid>
-          )}
-
-          <Grid item xs={12}>
-            <Box display="flex" gap={2}>
-              <Button
-                color="inherit"
-                variant="contained"
-                onClick={async () => {
-                  payCrypto.pay();
-                }}
-                endIcon={
-                  payCrypto.isPayingLoading ? (
-                    <CircularProgress size={24} color="inherit" />
-                  ) : (
-                    <Send />
-                  )
-                }
-              >
-                {payCrypto.isPayingLoading ? 'Paying' : 'Pay'}
-              </Button>
-              <Button
-                color="inherit"
-                variant="contained"
-                onClick={async () => {
-                  if (payCrypto.reset) payCrypto.reset();
-                }}
-                endIcon={<Cancel />}
-              >
-                Cancel
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
-      </Box>
-    </div>
-  );
-}
-
-function PayThroughRipeFiat({ payCrypto }: { payCrypto: PaymentUIState }) {
-  const SGD_USD_CONVERSION = 0.77;
-
-  return (
-    <div>
-      <Box sx={{ p: 3, background: 'white', borderRadius: '20px' }}>
-        <Typography variant="h5" gutterBottom>
-          Pay Fiat using @Ripe
-        </Typography>
-
-        <Grid container spacing={2}>
-          {!payCrypto.phoneNumber && !payCrypto.uen && !payCrypto.netsAcc ? (
-            <Grid item xs={12}>
-              <Typography variant="body1" gutterBottom>
-                No Phone Number, UEN and Nets account found
-              </Typography>
-            </Grid>
-          ) : (
-            <>
-              {payCrypto.phoneNumber && (
-                <Grid item xs={12}>
-                  <Typography variant="h6" gutterBottom>
-                    Phone Number:
-                  </Typography>
-                  <Typography variant="body1" sx={{ wordWrap: 'break-word' }}>
-                    {payCrypto.phoneNumber}
-                  </Typography>
-                </Grid>
-              )}
-
-              {payCrypto.uen && (
-                <Grid item xs={12}>
-                  <Typography variant="h6" gutterBottom>
-                    UEN:
-                  </Typography>
-                  <Typography variant="body1" sx={{ wordWrap: 'break-word' }}>
-                    {payCrypto.uen}
-                  </Typography>
-                </Grid>
-              )}
-
-              {payCrypto.netsAcc && (
-                <Grid item xs={12}>
-                  <Typography variant="h6" gutterBottom>
-                    SG NETS Account:
-                  </Typography>
-                  <Typography variant="body1" sx={{ wordWrap: 'break-word' }}>
-                    {payCrypto.netsAcc}
-                  </Typography>
-                </Grid>
-              )}
-
-              {/* Token (Icon, name, address) */}
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom>
-                  Token:
-                </Typography>
-                <Typography
-                  variant="body1"
-                  style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}
-                >
-                  <img
-                    src="/pyusd.png"
-                    alt="PYUSD"
-                    style={{ width: '24px', marginRight: '8px' }}
-                  />
-                  {'PYUSD'} ({payCrypto.tokenAddress})
-                </Typography>
-              </Grid>
-
-              {/* Fiat Amount */}
-              <Grid item xs={6}>
-                <TextField
-                  label="Fiat Amount (SGD)"
-                  variant="outlined"
-                  fullWidth
-                  type="number"
-                  name="fiatAmount"
-                  value={payCrypto.fiatAmount}
-                  onChange={(e) =>
-                    payCrypto.updateFields &&
-                    payCrypto.updateFields({
-                      fiatAmount: Number(e.target.value || 0),
-                      tokenAmount:
-                        Number(e.target.value || 0) * SGD_USD_CONVERSION,
-                      memo: payCrypto.memo,
-                    })
-                  }
-                />
-              </Grid>
-
-              {/* Token Amount */}
-              <Grid item xs={6}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    border: '1px solid rgba(0, 0, 0, 0.23)', // Similar border to TextField
-                    borderRadius: '4px', // Match TextField's border radius
-                    padding: '16.5px 14px', // Padding matches the default padding of TextField
-                    backgroundColor: '#fff', // TextField background color
-                    fontSize: '16px', // Default font size for TextField
-                    lineHeight: '1.5', // Adjust to match TextField's line height
-                    height: '56px',
-                  }}
-                >
-                  <img
-                    src="/pyusd.png"
-                    alt="PYUSD"
-                    style={{ width: '24px', marginRight: '8px' }}
-                  />
-                  <Typography
-                    variant="body1"
-                    style={{
-                      wordBreak: 'break-all',
-                      overflowWrap: 'break-word',
-                    }}
-                  >
-                    {'PYUSD'} {payCrypto.tokenAmount}
-                  </Typography>
-                </div>
-              </Grid>
-
-              {/* Memo */}
-              <Grid item xs={12}>
-                <TextField
-                  label="Memo"
-                  variant="outlined"
-                  fullWidth
-                  name="memo"
-                  value={payCrypto.memo}
-                  onChange={(e) =>
-                    payCrypto.updateFields &&
-                    payCrypto.updateFields({
-                      memo: e.target.value,
-                      fiatAmount: payCrypto.fiatAmount,
-                      tokenAmount: payCrypto.tokenAmount,
-                    })
-                  }
-                />
-              </Grid>
-
-              {/* Transaction Hash */}
-              {payCrypto.hash && (
-                <Grid item xs={12}>
-                  <Typography variant="h6" gutterBottom>
-                    Transaction Hash:
-                  </Typography>
-                  <Typography
-                    variant="body1"
-                    style={{
-                      wordBreak: 'break-all',
-                      overflowWrap: 'break-word',
-                    }}
-                  >
-                    {payCrypto.hash}
-                  </Typography>
-                </Grid>
-              )}
-
-              <Grid item xs={12}>
-                <Box display="flex" gap={2}>
-                  <Button
-                    color="inherit"
-                    variant="contained"
-                    onClick={async () => {
-                      payCrypto.pay();
-                    }}
-                    endIcon={
-                      payCrypto.isPayingLoading ? (
-                        <CircularProgress size={24} color="inherit" />
-                      ) : (
-                        <Send />
-                      )
-                    }
-                  >
-                    {payCrypto.isPayingLoading ? 'Paying' : 'Pay'}
-                  </Button>
-                  <Button
-                    color="inherit"
-                    variant="contained"
-                    onClick={async () => {
-                      if (payCrypto.reset) payCrypto.reset();
-                    }}
-                    endIcon={<Cancel />}
-                  >
-                    Cancel
-                  </Button>
-                </Box>
-              </Grid>
-            </>
-          )}
-        </Grid>
-      </Box>
-    </div>
-  );
-}
-
-function encrypt(data: string, apiKey: string) {
-  // Use the API key to create a key for encryption
-  const key = crypto.createHash('sha256').update(apiKey).digest();
-
-  // Create an initialization vector
-  const iv = crypto.randomBytes(16);
-
-  // Create cipher
-  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-
-  // Encrypt the data
-  let encryptedData = cipher.update(data, 'utf8', 'hex');
-  encryptedData += cipher.final('hex');
-
-  // Create a signature
-  const hmac = crypto.createHmac('sha256', key);
-  hmac.update(encryptedData);
-  const signature = hmac.digest('hex');
-
-  // Combine IV, encrypted data, and signature
-  return iv.toString('hex') + ':' + encryptedData + ':' + signature;
-}
-
-function decrypt(data: string, apiKey: string) {
-  // Split the encrypted memo into its components
-  const [ivHex, encryptedData, signature] = data.split(':');
-
-  // Use the API key to recreate the encryption key
-  const key = crypto.createHash('sha256').update(apiKey).digest();
-
-  // Verify the signature
-  const hmac = crypto.createHmac('sha256', key);
-  hmac.update(encryptedData);
-  const computedSignature = hmac.digest('hex');
-
-  if (computedSignature !== signature) {
-    throw new Error(
-      'Signature verification failed. The data may have been tampered with.',
-    );
-  }
-
-  // Recreate the IV
-  const iv = Buffer.from(ivHex, 'hex');
-
-  // Create decipher
-  const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-
-  // Decrypt the data
-  let decryptedData = decipher.update(encryptedData, 'hex', 'utf8');
-  decryptedData += decipher.final('utf8');
-
-  // Parse the JSON data
-  return decryptedData;
-}
-
-//throw a few examples to ChatGPT to let it generate possible Regex patterns
-function extractPayNowInfo(payNowString: string): {
-  uen?: string;
-  phoneNumber?: string;
-  netsAccount?: string;
-} {
-  // Regular expression to capture phone numbers (Singapore numbers usually start with +65)
-  const phoneRegex = /\+65\d{8}/;
-  // Updated UEN regex: Alphanumeric UEN which can be 9 digits followed by a letter or other similar formats
-  const uenRegex = /\b\d{9}[A-Z]|\b\d{10}[A-Z]\b/;
-  // Regular expression to capture NETS account numbers (typically 12 digits separated by spaces)
-  const netsRegex = /\d{6}\s\d{4}\s\d{6}/;
-
-  const phoneNumberMatch = payNowString.match(phoneRegex);
-  const uenMatch = payNowString.match(uenRegex);
-  const netsAccountMatch = payNowString.match(netsRegex);
-
-  return {
-    uen: uenMatch ? uenMatch[0] : undefined,
-    phoneNumber: phoneNumberMatch ? phoneNumberMatch[0] : undefined,
-    netsAccount: netsAccountMatch
-      ? netsAccountMatch[0].replace(/\s/g, '')
-      : undefined, // remove spaces in NETS accounts
-  };
-}
-
-function isTransferRequestURL(obj: unknown): obj is TransferRequestURL {
-  return typeof obj === 'object' && obj !== null && 'recipient' in obj;
-}
-
-function isParsedInstruction(obj: unknown): obj is ParsedInstruction {
-  return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    'program' in obj &&
-    'parsed' in obj
-  );
 }
 
 export { PayProvider, usePay, PayUI };

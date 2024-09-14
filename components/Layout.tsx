@@ -192,10 +192,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             ))}
           </List>
         </Drawer>
-        <Container maxWidth="xl">
-          <DrawerHeader />
-          {children}
-        </Container>
+        <Container maxWidth="xl">{children}</Container>
       </Container>
       <BottomNavBar />
     </Box>
