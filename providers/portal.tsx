@@ -197,9 +197,6 @@ export const PortalProvider: React.FC<{ children: React.ReactNode }> = ({
                 },
               );
               transactionList.push(tx);
-              console.log(
-                `Fetched transaction ${i + 1} of ${signatures.length}`,
-              );
             }
 
             // Filter out any null transactions

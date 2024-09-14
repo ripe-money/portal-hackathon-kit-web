@@ -18,7 +18,7 @@ export default function Home() {
   const loadTransactions = async () => {
     try {
       setIsLoading(true);
-      const txns = payCrypto.getPaymentTransactions();
+      const txns = await payCrypto.getPaymentTransactions();
       console.log(txns);
       // setTransactions(txns);
     } catch (e) {

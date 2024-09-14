@@ -318,6 +318,7 @@ function PayProvider({ children }: { children: React.ReactNode }) {
       if (!memo || typeof memo !== 'string') return null;
       if (!memo.startsWith(MemoPrefix))
         throw new Error('This is not a payment transaction initiated by Ripe');
+
       const memoInfo = JSON.parse(decrypt(memo.substring(5), apiKey));
       if (!memoInfo?.description || !memoInfo?.payType)
         throw new Error('This is not a payment transaction initiated by Ripe');
@@ -325,9 +326,9 @@ function PayProvider({ children }: { children: React.ReactNode }) {
       return memoInfo;
     } catch (error) {
       console.error(error);
-    } finally {
-      return null;
     }
+
+    return null;
   }
 
   return (
