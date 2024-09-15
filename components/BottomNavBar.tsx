@@ -12,7 +12,7 @@ export default function BottomNavBar() {
       <Box
         sx={{
           position: 'relative',
-          bgcolor: '#3f51b5',
+          bgcolor: '#3e71f8',
           height: '56px',
           display: 'flex',
           justifyContent: 'space-between',
@@ -28,7 +28,7 @@ export default function BottomNavBar() {
             height: '70px',
             backgroundColor: 'transparent',
             borderRadius: '35px',
-            boxShadow: '0 -35px 0 0 #3f51b5',
+            boxShadow: '0 -35px 0 0 #3e71f8',
           },
         }}
       >
