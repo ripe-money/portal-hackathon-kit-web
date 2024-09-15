@@ -29,23 +29,6 @@ function QRScanner({ decode }: { decode?: (rawQRData: string) => void }) {
         position: 'relative',
       }}
     >
-      <Typography
-        sx={{
-          position: 'absolute',
-          right: '35px',
-          bottom: '10px',
-          zIndex: 10,
-          fontSize: {
-            xs: '10px',
-            sm: '12px',
-          },
-          color: '#8B6A00',
-          fontWeight: 'bold',
-          fontFamily: 'fantasy',
-        }}
-      >
-        Powered by @Ripe
-      </Typography>
       <Scanner onScan={(result) => handleOnScan(result)} />
     </Box>
   );
@@ -61,7 +44,7 @@ function PayThroughSolana_Pay({ payCrypto }: { payCrypto: PaymentUIState }) {
         <img
           src="/solanapay-logo.svg"
           alt="solana pay logo"
-          style={{ marginLeft: '8px' }}
+          style={{ marginLeft: '16px', transform: 'translateY(-4px)' }}
         />
       </Box>
 
@@ -86,12 +69,19 @@ function PayThroughSolana_Pay({ payCrypto }: { payCrypto: PaymentUIState }) {
           </Typography>
           <Typography
             variant="body1"
-            style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}
+            style={{
+              wordBreak: 'break-all',
+              overflowWrap: 'break-word',
+            }}
           >
             <img
               src="/pyusd.png"
               alt="PYUSD"
-              style={{ width: '24px', marginRight: '8px' }}
+              style={{
+                width: '24px',
+                marginRight: '8px',
+                transform: 'translateY(5px)',
+              }}
             />
             {'PYUSD'} ({payCrypto.tokenAddress})
           </Typography>
@@ -204,14 +194,18 @@ function PayThroughSolanaTransfer({
               <img
                 src="/pyusd.png"
                 alt="PYUSD"
-                style={{ width: '24px', marginRight: '8px' }}
+                style={{
+                  width: '24px',
+                  marginRight: '8px',
+                  transform: 'translateY(5px)',
+                }}
               />
               {'PYUSD'} ({payCrypto.tokenAddress})
             </Typography>
           </Grid>
 
           {/* Token Amount */}
-          <Grid item xs={12}>
+          <Grid item xs={12} marginTop={'10px'}>
             <TextField
               label="Token Amount"
               variant="outlined"
@@ -307,7 +301,7 @@ function PayThroughRipeFiat({ payCrypto }: { payCrypto: PaymentUIState }) {
     <div>
       <Box sx={{ p: 3, background: 'white', borderRadius: '20px' }}>
         <Typography variant="h5" gutterBottom>
-          Pay Fiat using @Ripe
+          Pay Fiat Using Ripe
         </Typography>
 
         <Grid container spacing={2}>
@@ -364,14 +358,18 @@ function PayThroughRipeFiat({ payCrypto }: { payCrypto: PaymentUIState }) {
                   <img
                     src="/pyusd.png"
                     alt="PYUSD"
-                    style={{ width: '24px', marginRight: '8px' }}
+                    style={{
+                      width: '24px',
+                      marginRight: '8px',
+                      transform: 'translateY(5px)',
+                    }}
                   />
                   {'PYUSD'} ({payCrypto.tokenAddress})
                 </Typography>
               </Grid>
 
               {/* Fiat Amount */}
-              <Grid item xs={6}>
+              <Grid item xs={6} marginTop={'10px'}>
                 <TextField
                   label="Fiat Amount (SGD)"
                   variant="outlined"
@@ -392,7 +390,7 @@ function PayThroughRipeFiat({ payCrypto }: { payCrypto: PaymentUIState }) {
               </Grid>
 
               {/* Token Amount */}
-              <Grid item xs={6}>
+              <Grid item xs={6} marginTop={'10px'}>
                 <div
                   style={{
                     display: 'flex',
@@ -504,4 +502,3 @@ export {
   PayThroughRipeFiat,
   QRScanner,
 };
-
