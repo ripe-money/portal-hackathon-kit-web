@@ -90,20 +90,24 @@ export default function Home() {
         flexDirection: 'column',
         maxHeight: '70vh',
         overflow: 'auto',
+        background: 'white',
+        borderRadius: '20px',
       }}
     >
       <Container
         maxWidth="lg"
-        sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', py: 4 }}
+        sx={{
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          py: 4,
+        }}
       >
         <Box
           sx={{
             p: { xs: 2, md: 4 },
             display: 'flex',
             flexDirection: 'column',
-            background: 'white',
-            borderRadius: '20px',
-            boxShadow: 3,
             overflow: 'auto',
           }}
         >
