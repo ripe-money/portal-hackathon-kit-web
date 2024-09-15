@@ -4454,9 +4454,9 @@ pkg-dir@^4.2.0:
     find-up "^4.0.0"
 
 portal-sol-pay-package@^1.0.0:
-  version "1.0.25"
-  resolved "https://registry.yarnpkg.com/portal-sol-pay-package/-/portal-sol-pay-package-1.0.25.tgz#4ba3f344bf9fe07fc8e363a0b490a4723220c997"
-  integrity sha512-jZgEMzt1prPTL86BPbl+lbMff1smDPKc2RGTVfBrIKFzLGwIZnEf9E8phUWYSLeZA0Rn94lbMglU22hpuzN4VQ==
+  version "1.0.26"
+  resolved "https://registry.yarnpkg.com/portal-sol-pay-package/-/portal-sol-pay-package-1.0.26.tgz#1208055151884d5076b025a1772d00f9c16bc904"
+  integrity sha512-fmS89lbMgZ0xbH+Yknsr+8AUjPVZ4QrFkkw99HOBgEyfSCr8sDKpnUmdF3ySuonQCdPjvYnpKwbvYnewCQHJKw==
   dependencies:
     "@emotion/react" "^11.13.0"
     "@emotion/styled" "^11.13.0"
