@@ -1,5 +1,5 @@
 import { TransferRequestURL } from '@solana/pay';
-import { ParsedInstruction } from '@solana/web3.js';
+import { ParsedInstruction, ParsedTransactionWithMeta } from '@solana/web3.js';
 import crypto from 'crypto';
 
 function encrypt(data: string, apiKey: string) {
@@ -95,10 +95,73 @@ function isParsedInstruction(obj: unknown): obj is ParsedInstruction {
   );
 }
 
+function getRecipientAddress(tx: ParsedTransactionWithMeta): string {
+  const instructions = tx.transaction.message.instructions;
+
+  // Look for a token transfer instruction
+  const transferInstruction = instructions.find(
+    (ix) =>
+      'parsed' in ix &&
+      ix.program === 'spl-token' &&
+      ix.parsed.type === 'transfer',
+  );
+
+  if (transferInstruction && 'parsed' in transferInstruction) {
+    return transferInstruction.parsed.info.destination;
+  }
+
+  // If we can't find a token transfer instruction, look for a system transfer
+  const systemTransferInstruction = instructions.find(
+    (ix) =>
+      'parsed' in ix &&
+      ix.program === 'system' &&
+      ix.parsed.type === 'transfer',
+  );
+
+  if (systemTransferInstruction && 'parsed' in systemTransferInstruction) {
+    return systemTransferInstruction.parsed.info.destination;
+  }
+
+  return 'Recipient address not found';
+}
+
+const getTransactionAmount = (tx: ParsedTransactionWithMeta): string => {
+  if (!tx.meta || !tx.meta.preTokenBalances || !tx.meta.postTokenBalances) {
+    return 'N/A';
+  }
+
+  // Find the token account that changed
+  const preBalances = tx.meta.preTokenBalances;
+  const postBalances = tx.meta.postTokenBalances;
+
+  for (let i = 0; i < preBalances.length; i++) {
+    const preBalance = preBalances[i];
+    const postBalance = postBalances.find(
+      (b) => b.accountIndex === preBalance.accountIndex,
+    );
+
+    if (preBalance && postBalance) {
+      const preAmount = preBalance.uiTokenAmount.uiAmount;
+      const postAmount = postBalance.uiTokenAmount.uiAmount;
+
+      if (preAmount !== null && postAmount !== null) {
+        const difference = Math.abs(postAmount - preAmount);
+        if (difference > 0) {
+          return difference.toString();
+        }
+      }
+    }
+  }
+
+  return 'N/A';
+};
+
 export {
   encrypt,
   decrypt,
   extractPayNowInfo,
   isTransferRequestURL,
   isParsedInstruction,
+  getRecipientAddress,
+  getTransactionAmount,
 };

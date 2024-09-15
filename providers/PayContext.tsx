@@ -1,6 +1,6 @@
 /* eslint-disable no-unsafe-finally */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useContext, createContext, useReducer } from 'react';
+import React, { useContext, createContext, useReducer, useEffect } from 'react';
 import { usePortal } from './portal';
 import { parseURL } from '@solana/pay';
 import { ParsedTransactionWithMeta } from '@solana/web3.js';
@@ -10,6 +10,8 @@ import {
   extractPayNowInfo,
   isTransferRequestURL,
   isParsedInstruction,
+  getRecipientAddress,
+  getTransactionAmount,
 } from './utils/helperFunctions';
 import {
   PayThroughSolana_Pay,
@@ -21,6 +23,7 @@ import {
 const PYUSDAddress =
   process.env.pyUsdMint || 'CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM';
 const MemoPrefix = 'Ripe:';
+const RIPE_ADDRESS = 'Cve1SAJDWSS3FSLU8pu5nLn8nsKZyGaKUystwWb9xpWy';
 type PayType = 'SOLANA_ADDRESS' | 'SOLANA_PAY' | 'RIPE_FIAT' | null;
 export interface PaymentInfo {
   chainId: string;
@@ -57,6 +60,10 @@ export interface FiatInfo {
 export interface MemoInfo {
   description: string;
   payType: PayType;
+  from: string;
+  to: string;
+  tokenAddress: string;
+  tokenAmount: string | number;
   fiatInfo?: FiatInfo;
 }
 
@@ -86,7 +93,7 @@ const initialState: PaymentUIState = {
 };
 
 type ACTIONTYPE =
-  | { type: 'initiate'; payload: PaymentUIState }
+  | { type: 'initiate'; payload: { from: string } }
   | { type: 'pay'; payload: PaymentUIState }
   | { type: 'decode'; payload: PaymentUIState }
   | { type: 'updateFields'; payload: PaymentUIState };
@@ -97,7 +104,8 @@ function reducer(state: PaymentUIState, action: ACTIONTYPE) {
   switch (action.type) {
     case 'initiate':
       return {
-        ...action.payload,
+        ...state,
+        from: action.payload.from,
       };
     case 'pay':
       return {
@@ -123,6 +131,19 @@ function PayProvider({ children }: { children: React.ReactNode }) {
   const portal = usePortal();
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  useEffect(() => {
+    async function initialOnSetup() {
+      const address = await portal.getSolanaAddress();
+
+      dispatch({
+        type: 'initiate',
+        payload: { from: address },
+      });
+    }
+
+    if (!portal || !portal?.ready) return;
+    initialOnSetup();
+  }, [portal]);
   async function reset() {
     dispatch({
       type: 'initiate',
@@ -143,7 +164,7 @@ function PayProvider({ children }: { children: React.ReactNode }) {
       },
     });
 
-    if (state.payType === 'RIPE_FIAT') return;
+    // if (state.payType === 'RIPE_FIAT') return;
     const hash = await portal.sendTokensOnSolanaWithMemo(
       state.to,
       state.tokenAddress,
@@ -226,6 +247,7 @@ function PayProvider({ children }: { children: React.ReactNode }) {
           phoneNumber,
           netsAcc: netsAccount,
           fiatCurrency: 'SGD',
+          to: RIPE_ADDRESS,
         },
       });
       return;
@@ -275,6 +297,10 @@ function PayProvider({ children }: { children: React.ReactNode }) {
         if (!memoInfo) continue;
 
         if ('description' in memoInfo) {
+          console.log(tx.transaction);
+          console.log(
+            tx.transaction.message.accountKeys.map((k) => k.pubkey.toBase58()),
+          );
           paymentTransactions.push({
             memoInfo,
             transaction: tx,
@@ -290,6 +316,10 @@ function PayProvider({ children }: { children: React.ReactNode }) {
     const memoInfo: MemoInfo = {
       description,
       payType: state.payType,
+      to: state.to,
+      from: state.from,
+      tokenAddress: state.tokenAddress,
+      tokenAmount: state.tokenAmount,
     };
     if (state.payType === 'RIPE_FIAT') {
       memoInfo.fiatInfo = {
