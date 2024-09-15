@@ -32,6 +32,10 @@ const DRAWER_ITEMS = [
     name: 'Send Tokens',
     link: '/send',
   },
+  {
+    name: 'View All Payments',
+    link: '/payments',
+  },
 ];
 
 const DrawerHeader = styled('div')(({ theme }) => ({
@@ -188,10 +192,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             ))}
           </List>
         </Drawer>
-        <Container maxWidth="xl">
-          <DrawerHeader />
-          {children}
-        </Container>
+        <Container maxWidth="xl">{children}</Container>
       </Container>
       <BottomNavBar />
     </Box>

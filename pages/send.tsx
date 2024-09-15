@@ -46,7 +46,15 @@ export default function Home() {
   }, [portal.ready]);
 
   return (
-    <Box>
+    <Box
+      sx={{
+        p: 4,
+        display: 'flex',
+        justifyContent: 'center',
+        placeItems: 'start',
+        minHeight: '65vh',
+      }}
+    >
       <Container maxWidth="lg">
         <Box
           sx={{
@@ -54,6 +62,8 @@ export default function Home() {
             py: { xs: 8, md: 16 },
             display: 'flex',
             justifyContent: 'center',
+            background: 'white',
+            borderRadius: '20px',
           }}
         >
           <Grid container spacing={{ xs: 0.5, md: 2 }} maxWidth={800}>
@@ -74,6 +84,7 @@ export default function Home() {
                   disabled={tokensLoading}
                   defaultValue={tokenMint}
                   onChange={(e) => setTokenMint(e.target.value)}
+                  sx={{ color: 'white', borderColor: 'white' }}
                 >
                   {tokens
                     .filter(
@@ -132,8 +143,7 @@ export default function Home() {
                 onClick={async () => {
                   try {
                     setTxnOngoing(true);
-                    console.log(to, tokenMint, tokenAmount);
-                    const hash = await portal.sendTokensOnSolana(
+                    const hash = await portal.sendTokensOnSolanaWithMemo(
                       to,
                       tokenMint,
                       tokenAmount,

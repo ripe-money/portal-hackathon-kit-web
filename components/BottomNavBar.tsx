@@ -41,9 +41,9 @@ export default function BottomNavBar() {
             top: '-28px',
             left: '50%',
             transform: 'translateX(-50%)',
-            bgcolor: '#ff4081',
+            bgcolor: '#FFCC3D',
             '&:hover': {
-              bgcolor: '#f50057',
+              bgcolor: '#e6b837',
             },
             zIndex: 1,
           }}
