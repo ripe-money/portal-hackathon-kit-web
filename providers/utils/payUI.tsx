@@ -504,4 +504,3 @@ export {
   PayThroughRipeFiat,
   QRScanner,
 };
-

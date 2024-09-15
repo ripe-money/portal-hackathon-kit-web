@@ -144,10 +144,6 @@ function PayProvider({ children }: { children: React.ReactNode }) {
     });
 
     if (state.payType === 'RIPE_FIAT') return;
-    const memo = constructMemoWithEncryption(
-      state.memo || 'No Memo Provided',
-      process.env.portalClientApiKey,
-    );
     const hash = await portal.sendTokensOnSolanaWithMemo(
       state.to,
       state.tokenAddress,
@@ -166,8 +162,6 @@ function PayProvider({ children }: { children: React.ReactNode }) {
         hash,
       },
     });
-
-    destructureMemoWithDecryption(memo, process.env.portalClientApiKey);
   }
 
   async function updateFields(updatedFields: {

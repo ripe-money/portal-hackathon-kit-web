@@ -10,9 +10,9 @@ import {
   Divider,
   Chip,
 } from '@mui/material';
-import { usePortal } from '@/providers/portal';
+import { usePortal } from 'portal-sol-pay-package';
 import { useSnackbar } from '@/providers/snackbar';
-import { FiatInfo, PaymentTransaction, usePay } from '@/providers/PayContext';
+import { FiatInfo, PaymentTransaction, usePay } from 'portal-sol-pay-package';
 
 export default function Home() {
   const portal = usePortal();
