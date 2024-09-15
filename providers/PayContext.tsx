@@ -1,18 +1,8 @@
 /* eslint-disable no-unsafe-finally */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useContext, createContext, useReducer } from 'react';
-import { Scanner } from '@yudiel/react-qr-scanner';
 import { usePortal } from './portal';
 import { parseURL } from '@solana/pay';
-import {
-  Grid,
-  Typography,
-  Button,
-  Box,
-  CircularProgress,
-  TextField,
-} from '@mui/material';
-import { Cancel, Send } from '@mui/icons-material';
 import { ParsedTransactionWithMeta } from '@solana/web3.js';
 import {
   encrypt,
