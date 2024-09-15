@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { Box, Fab } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
 import { useRouter } from 'next/navigation';
+import { CropFree } from '@mui/icons-material';
 
 export default function BottomNavBar() {
   const router = useRouter();
@@ -12,7 +12,7 @@ export default function BottomNavBar() {
       <Box
         sx={{
           position: 'relative',
-          bgcolor: '#3f51b5',
+          bgcolor: '#3e71f8',
           height: '56px',
           display: 'flex',
           justifyContent: 'space-between',
@@ -28,7 +28,7 @@ export default function BottomNavBar() {
             height: '70px',
             backgroundColor: 'transparent',
             borderRadius: '35px',
-            boxShadow: '0 -35px 0 0 #3f51b5',
+            boxShadow: '0 -35px 0 0 #3e71f8',
           },
         }}
       >
@@ -41,7 +41,7 @@ export default function BottomNavBar() {
             top: '-28px',
             left: '50%',
             transform: 'translateX(-50%)',
-            bgcolor: '#FFCC3D',
+            bgcolor: 'white',
             '&:hover': {
               bgcolor: '#e6b837',
             },
@@ -51,7 +51,9 @@ export default function BottomNavBar() {
             router.push('/scan');
           }}
         >
-          <AddIcon />
+          {/* <AddIcon /> */}
+          {/* <SolanaPayIcon /> */}
+          <CropFree color="primary" fontSize="large" />
         </Fab>
         {/* Bottom Navigation Icons */}
         <Box sx={{ width: '70px' }} /> {/* Spacer for FAB */}

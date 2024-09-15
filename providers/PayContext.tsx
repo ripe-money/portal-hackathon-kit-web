@@ -93,7 +93,8 @@ const initialState: PaymentUIState = {
 };
 
 type ACTIONTYPE =
-  | { type: 'initiate'; payload: { from: string } }
+  | { type: 'initiate'; payload: PaymentUIState }
+  | { type: 'setPayer'; payload: { from: string } }
   | { type: 'pay'; payload: PaymentUIState }
   | { type: 'decode'; payload: PaymentUIState }
   | { type: 'updateFields'; payload: PaymentUIState };
@@ -103,6 +104,10 @@ const PayContext = createContext(initialState);
 function reducer(state: PaymentUIState, action: ACTIONTYPE) {
   switch (action.type) {
     case 'initiate':
+      return {
+        ...action.payload,
+      };
+    case 'setPayer':
       return {
         ...state,
         from: action.payload.from,
@@ -132,17 +137,17 @@ function PayProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    async function initialOnSetup() {
+    async function setPayerAfterInitiate() {
       const address = await portal.getSolanaAddress();
 
       dispatch({
-        type: 'initiate',
+        type: 'setPayer',
         payload: { from: address },
       });
     }
 
     if (!portal || !portal?.ready) return;
-    initialOnSetup();
+    setPayerAfterInitiate();
   }, [portal]);
   async function reset() {
     dispatch({
