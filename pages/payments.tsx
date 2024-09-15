@@ -9,6 +9,7 @@ import {
   ListItemText,
   Divider,
   Chip,
+  Link,
 } from '@mui/material';
 import { usePortal } from '@/providers/portal';
 import { useSnackbar } from '@/providers/snackbar';
@@ -120,8 +121,27 @@ export default function Home() {
                   <ListItem alignItems="flex-start">
                     <ListItemText
                       primary={
-                        <Typography variant="h6" color="primary">
-                          {tx.memoInfo.description}
+                        <Typography
+                          variant="h6"
+                          color="primary"
+                          sx={{
+                            '& a': {
+                              textDecoration: 'none',
+                              transition: 'text-decoration 0.3s',
+                              '&:hover': {
+                                textDecoration: 'underline',
+                              },
+                            },
+                          }}
+                        >
+                          <Link
+                            href={`https://solscan.io/tx/${tx.transaction.transaction.signatures[0]}`}
+                            sx={{
+                              color: 'inherit',
+                            }}
+                          >
+                            {tx.memoInfo.description}
+                          </Link>
                         </Typography>
                       }
                       secondary={
@@ -146,8 +166,7 @@ export default function Home() {
                             variant="body2"
                             color="text.secondary"
                           >
-                            To:{' '}
-                            {tx.transaction.transaction.message.accountKeys[0].pubkey.toBase58()}
+                            To: {tx.memoInfo.to}
                           </Typography>
                           <br />
                           <Typography
@@ -155,9 +174,7 @@ export default function Home() {
                             variant="body2"
                             color="text.secondary"
                           >
-                            Token:{' '}
-                            {tx.transaction.meta?.postTokenBalances?.[0]
-                              ?.mint || 'N/A'}
+                            Token: {tx.memoInfo.tokenAddress}
                           </Typography>
                           <br />
                           <Typography
@@ -165,9 +182,7 @@ export default function Home() {
                             variant="body2"
                             color="text.secondary"
                           >
-                            Amount:{' '}
-                            {tx.transaction.meta?.postTokenBalances?.[0]
-                              ?.uiTokenAmount.uiAmount || 'N/A'}
+                            Amount: {tx.memoInfo.tokenAmount}
                           </Typography>
                         </React.Fragment>
                       }
