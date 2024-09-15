@@ -26,6 +26,7 @@ export default function Home() {
     try {
       setIsLoading(true);
       const txns = await payCrypto.getPaymentTransactions();
+      console.log(txns);
       setTransactions(txns);
     } catch (e) {
       snackbar.setSnackbarOpen(true);
@@ -47,24 +48,36 @@ export default function Home() {
   const renderFiatInfo = (fiatInfo: FiatInfo) => (
     <>
       {fiatInfo.fiatAmount && fiatInfo.fiatCurrency && (
-        <Typography component="span" variant="body2" color="text.primary">
-          Fiat Amount: {fiatInfo.fiatAmount} {fiatInfo.fiatCurrency}
-        </Typography>
+        <>
+          <Typography component="span" variant="body2" color="text.primary">
+            Fiat Amount: {fiatInfo.fiatAmount} {fiatInfo.fiatCurrency}
+          </Typography>
+          <br />
+        </>
       )}
       {fiatInfo.netsAcc && (
-        <Typography component="span" variant="body2" color="text.primary">
-          NETS Account: {fiatInfo.netsAcc}
-        </Typography>
+        <>
+          <Typography component="span" variant="body2" color="text.primary">
+            NETS Account: {fiatInfo.netsAcc}
+          </Typography>
+          <br />
+        </>
       )}
       {fiatInfo.uen && (
-        <Typography component="span" variant="body2" color="text.primary">
-          UEN: {fiatInfo.uen}
-        </Typography>
+        <>
+          <Typography component="span" variant="body2" color="text.primary">
+            UEN: {fiatInfo.uen}
+          </Typography>
+          <br />
+        </>
       )}
       {fiatInfo.phoneNumber && (
-        <Typography component="span" variant="body2" color="text.primary">
-          Phone Number: {fiatInfo.phoneNumber}
-        </Typography>
+        <>
+          <Typography component="span" variant="body2" color="text.primary">
+            Phone Number: {fiatInfo.phoneNumber}
+          </Typography>
+          <br />
+        </>
       )}
     </>
   );

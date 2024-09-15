@@ -21,6 +21,7 @@ import {
 const PYUSDAddress =
   process.env.pyUsdMint || 'CXk2AMBfi3TwaEL2468s6zP8xq9NxTXjp9gjMgzeUynM';
 const MemoPrefix = 'Ripe:';
+const RIPE_ADDRESS = 'Cve1SAJDWSS3FSLU8pu5nLn8nsKZyGaKUystwWb9xpWy';
 type PayType = 'SOLANA_ADDRESS' | 'SOLANA_PAY' | 'RIPE_FIAT' | null;
 export interface PaymentInfo {
   chainId: string;
@@ -143,11 +144,7 @@ function PayProvider({ children }: { children: React.ReactNode }) {
       },
     });
 
-    if (state.payType === 'RIPE_FIAT') return;
-    const memo = constructMemoWithEncryption(
-      state.memo || 'No Memo Provided',
-      process.env.portalClientApiKey,
-    );
+    // if (state.payType === 'RIPE_FIAT') return;
     const hash = await portal.sendTokensOnSolanaWithMemo(
       state.to,
       state.tokenAddress,
@@ -166,8 +163,6 @@ function PayProvider({ children }: { children: React.ReactNode }) {
         hash,
       },
     });
-
-    destructureMemoWithDecryption(memo, process.env.portalClientApiKey);
   }
 
   async function updateFields(updatedFields: {
@@ -232,6 +227,7 @@ function PayProvider({ children }: { children: React.ReactNode }) {
           phoneNumber,
           netsAcc: netsAccount,
           fiatCurrency: 'SGD',
+          to: RIPE_ADDRESS,
         },
       });
       return;
