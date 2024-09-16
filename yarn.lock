@@ -4453,26 +4453,6 @@ pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-portal-sol-pay-package@^1.0.0:
-  version "1.0.26"
-  resolved "https://registry.yarnpkg.com/portal-sol-pay-package/-/portal-sol-pay-package-1.0.26.tgz#1208055151884d5076b025a1772d00f9c16bc904"
-  integrity sha512-fmS89lbMgZ0xbH+Yknsr+8AUjPVZ4QrFkkw99HOBgEyfSCr8sDKpnUmdF3ySuonQCdPjvYnpKwbvYnewCQHJKw==
-  dependencies:
-    "@emotion/react" "^11.13.0"
-    "@emotion/styled" "^11.13.0"
-    "@mui/icons-material" "^5.16.6"
-    "@mui/material" "^5.16.6"
-    "@mui/styled-engine-sc" "^6.0.0-alpha.18"
-    "@portal-hq/web" "^3.2.0"
-    "@solana/pay" "^0.2.5"
-    "@solana/web3.js" "^1.95.3"
-    "@yudiel/react-qr-scanner" "^2.0.8"
-    bignumber.js "^9.1.2"
-    next "^14.2.8"
-    react "^18"
-    react-dom "^18"
-    styled-components "^6.1.12"
-
 possible-typed-array-names@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/possible-typed-array-names/-/possible-typed-array-names-1.0.0.tgz"
@@ -5364,6 +5344,26 @@ undici-types@~6.13.0:
   version "6.13.0"
   resolved "https://registry.npmjs.org/undici-types/-/undici-types-6.13.0.tgz"
   integrity sha512-xtFJHudx8S2DSoujjMd1WeWvn7KKWFRESZTMeL1RptAYERu29D6jphMjjY+vn96jvN3kVPDNxU/E13VTaXj6jg==
+
+universal-qr-scanner@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/universal-qr-scanner/-/universal-qr-scanner-1.1.1.tgz#cede72eebe59e0f13a5f2491c4a3e0cf1b25ab83"
+  integrity sha512-WAiiTaYyruKUr5NBH9zI6qNEAIjXi/GzdvJYB4yADpYE4CfcfySItmvSF521z9dOeTMlYPkteiRHIzqe90Q8KQ==
+  dependencies:
+    "@emotion/react" "^11.13.0"
+    "@emotion/styled" "^11.13.0"
+    "@mui/icons-material" "^5.16.6"
+    "@mui/material" "^5.16.6"
+    "@mui/styled-engine-sc" "^6.0.0-alpha.18"
+    "@portal-hq/web" "^3.2.0"
+    "@solana/pay" "^0.2.5"
+    "@solana/web3.js" "^1.95.3"
+    "@yudiel/react-qr-scanner" "^2.0.8"
+    bignumber.js "^9.1.2"
+    next "^14.2.8"
+    react "^18"
+    react-dom "^18"
+    styled-components "^6.1.12"
 
 update-browserslist-db@^1.1.0:
   version "1.1.0"

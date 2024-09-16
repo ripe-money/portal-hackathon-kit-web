@@ -11,9 +11,9 @@ import {
   Chip,
   Link,
 } from '@mui/material';
-import { usePortal } from 'portal-sol-pay-package';
+import { usePortal } from 'universal-qr-scanner';
 import { useSnackbar } from '@/providers/snackbar';
-import { FiatInfo, PaymentTransaction, usePay } from 'portal-sol-pay-package';
+import { FiatInfo, PaymentTransaction, usePay } from 'universal-qr-scanner';
 
 export default function Home() {
   const portal = usePortal();

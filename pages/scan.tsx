@@ -1,4 +1,4 @@
-import { usePay, PayUI } from 'portal-sol-pay-package';
+import { usePay, PayUI } from 'universal-qr-scanner';
 import { Box } from '@mui/material';
 import React from 'react';
 

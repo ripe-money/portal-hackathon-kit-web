@@ -17,7 +17,7 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import { useRouter } from 'next/router';
 import { Button, Container, InputAdornment, TextField } from '@mui/material';
-import { usePortal } from 'portal-sol-pay-package';
+import { usePortal } from 'universal-qr-scanner';
 import { ContentCopy, Pending, Send } from '@mui/icons-material';
 import { useSnackbar } from '@/providers/snackbar';
 import BottomNavBar from './BottomNavBar';

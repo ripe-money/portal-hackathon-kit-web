@@ -1,4 +1,4 @@
-import { ITokenBalance, usePortal } from 'portal-sol-pay-package';
+import { ITokenBalance, usePortal } from 'universal-qr-scanner';
 import React, { useEffect, useState } from 'react';
 import {
   Box,
