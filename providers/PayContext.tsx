@@ -175,7 +175,7 @@ function PayProvider({ children }: { children: React.ReactNode }) {
       state.tokenAddress,
       state.tokenAmount,
       constructMemoWithEncryption(
-        state.memo || 'No Memo Provided',
+        state.memo || 'no memo provided',
         process.env.portalClientApiKey,
       ),
     );

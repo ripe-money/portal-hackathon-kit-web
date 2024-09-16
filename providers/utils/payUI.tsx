@@ -9,7 +9,7 @@ import {
   CircularProgress,
   TextField,
 } from '@mui/material';
-import { Cancel, Send } from '@mui/icons-material';
+import { Cancel, Home, Send } from '@mui/icons-material';
 import React from 'react';
 import { PaymentUIState } from '../PayContext';
 import { Scanner } from '@yudiel/react-qr-scanner';
@@ -125,31 +125,33 @@ function PayThroughSolana_Pay({ payCrypto }: { payCrypto: PaymentUIState }) {
 
         <Grid item xs={12}>
           <Box display="flex" gap={2}>
-            <Button
-              color="inherit"
-              variant="contained"
-              onClick={async () => {
-                payCrypto.pay();
-              }}
-              endIcon={
-                payCrypto.isPayingLoading ? (
-                  <CircularProgress size={24} color="inherit" />
-                ) : (
-                  <Send />
-                )
-              }
-            >
-              {payCrypto.isPayingLoading ? 'Paying' : 'Pay'}
-            </Button>
+            {!payCrypto.hash && (
+              <Button
+                color="inherit"
+                variant="contained"
+                onClick={async () => {
+                  payCrypto.pay();
+                }}
+                endIcon={
+                  payCrypto.isPayingLoading ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    <Send />
+                  )
+                }
+              >
+                {payCrypto.isPayingLoading ? 'Paying' : 'Pay'}
+              </Button>
+            )}
             <Button
               color="inherit"
               variant="contained"
               onClick={async () => {
                 if (payCrypto.reset) payCrypto.reset();
               }}
-              endIcon={<Cancel />}
+              endIcon={payCrypto.hash ? <Home /> : <Cancel />}
             >
-              Cancel
+              {payCrypto.hash ? 'Home' : 'Cancel'}
             </Button>
           </Box>
         </Grid>
@@ -260,31 +262,33 @@ function PayThroughSolanaTransfer({
 
           <Grid item xs={12}>
             <Box display="flex" gap={2}>
-              <Button
-                color="inherit"
-                variant="contained"
-                onClick={async () => {
-                  payCrypto.pay();
-                }}
-                endIcon={
-                  payCrypto.isPayingLoading ? (
-                    <CircularProgress size={24} color="inherit" />
-                  ) : (
-                    <Send />
-                  )
-                }
-              >
-                {payCrypto.isPayingLoading ? 'Paying' : 'Pay'}
-              </Button>
+              {!payCrypto.hash && (
+                <Button
+                  color="inherit"
+                  variant="contained"
+                  onClick={async () => {
+                    payCrypto.pay();
+                  }}
+                  endIcon={
+                    payCrypto.isPayingLoading ? (
+                      <CircularProgress size={24} color="inherit" />
+                    ) : (
+                      <Send />
+                    )
+                  }
+                >
+                  {payCrypto.isPayingLoading ? 'Paying' : 'Pay'}
+                </Button>
+              )}
               <Button
                 color="inherit"
                 variant="contained"
                 onClick={async () => {
                   if (payCrypto.reset) payCrypto.reset();
                 }}
-                endIcon={<Cancel />}
+                endIcon={payCrypto.hash ? <Home /> : <Cancel />}
               >
-                Cancel
+                {payCrypto.hash ? 'Home' : 'Cancel'}
               </Button>
             </Box>
           </Grid>
@@ -460,31 +464,33 @@ function PayThroughRipeFiat({ payCrypto }: { payCrypto: PaymentUIState }) {
 
               <Grid item xs={12}>
                 <Box display="flex" gap={2}>
-                  <Button
-                    color="inherit"
-                    variant="contained"
-                    onClick={async () => {
-                      payCrypto.pay();
-                    }}
-                    endIcon={
-                      payCrypto.isPayingLoading ? (
-                        <CircularProgress size={24} color="inherit" />
-                      ) : (
-                        <Send />
-                      )
-                    }
-                  >
-                    {payCrypto.isPayingLoading ? 'Paying' : 'Pay'}
-                  </Button>
+                  {!payCrypto.hash && (
+                    <Button
+                      color="inherit"
+                      variant="contained"
+                      onClick={async () => {
+                        payCrypto.pay();
+                      }}
+                      endIcon={
+                        payCrypto.isPayingLoading ? (
+                          <CircularProgress size={24} color="inherit" />
+                        ) : (
+                          <Send />
+                        )
+                      }
+                    >
+                      {payCrypto.isPayingLoading ? 'Paying' : 'Pay'}
+                    </Button>
+                  )}
                   <Button
                     color="inherit"
                     variant="contained"
                     onClick={async () => {
                       if (payCrypto.reset) payCrypto.reset();
                     }}
-                    endIcon={<Cancel />}
+                    endIcon={payCrypto.hash ? <Home /> : <Cancel />}
                   >
-                    Cancel
+                    {payCrypto.hash ? 'Home' : 'Cancel'}
                   </Button>
                 </Box>
               </Grid>

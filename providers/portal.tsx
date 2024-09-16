@@ -111,23 +111,25 @@ export const PortalProvider: React.FC<{ children: React.ReactNode }> = ({
               },
             },
             {
-              ...pyusdBalance,
-              metadata: {
-                ...pyusdBalance.metadata,
-                thumbnail: pyusdThumb.src,
-              },
+              ...data.tokenBalances.map((tb: ITokenBalance) => {
+                if (tb.metadata.tokenMintAddress !== process.env.pyusdMint) {
+                  return {
+                    ...tb,
+                    metadata: {
+                      ...tb.metadata,
+                      thumbnail: pyusdThumb.src,
+                    },
+                  };
+                }
+              })[0],
             },
-            ...data.tokenBalances.filter(
-              (tb: ITokenBalance) =>
-                tb.metadata.tokenMintAddress !== process.env.pyusdMint,
-            ),
           ];
         },
         async sendTokensOnSolanaWithMemo(
           to,
           tokenMint,
           tokenAmount,
-          memo = 'No Memo Provided',
+          memo = 'no memo provided',
         ) {
           if (!portal || !portal?.ready)
             throw new Error('Portal has not initialised');
