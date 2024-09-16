@@ -43,7 +43,7 @@ export default function BottomNavBar() {
             transform: 'translateX(-50%)',
             bgcolor: 'white',
             '&:hover': {
-              bgcolor: '#e6b837',
+              bgcolor: 'white',
             },
             zIndex: 1,
           }}

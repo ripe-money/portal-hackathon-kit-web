@@ -102,6 +102,10 @@ export default function Home() {
                             <Avatar
                               alt={token.symbol}
                               src={token.metadata?.thumbnail as string}
+                              sx={{
+                                width: '36px',
+                                height: '36px',
+                              }}
                             >
                               {!token.metadata?.thumbnail ? <Token /> : <></>}
                             </Avatar>

@@ -77,7 +77,6 @@ export default function Home() {
           <Typography component="span" variant="body2" color="text.primary">
             Phone Number: {fiatInfo.phoneNumber}
           </Typography>
-          <br />
         </>
       )}
     </>
