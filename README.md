@@ -8,4 +8,4 @@ This is simple repo used to build an application on top of PayPal's PYUSD stable
 
 ## Universal QR Scanner
 
-This repo is a UI Demo project to showcase the functions provided by [Universal QR Scanner](https://github.com/LLHOYH/portal-sol-pay-package/blob/main/README.md).
+This repo is a UI Demo project to showcase the functions provided by [Universal QR Scanner](https://github.com/LLHOYH/universal-qr-scanner).
