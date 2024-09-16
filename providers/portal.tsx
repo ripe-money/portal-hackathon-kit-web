@@ -134,11 +134,6 @@ export const PortalProvider: React.FC<{ children: React.ReactNode }> = ({
           if (!portal || !portal?.ready)
             throw new Error('Portal has not initialised');
 
-          console.log({
-            to,
-            token: tokenMint,
-            amount: String(tokenAmount),
-          });
           const res = await fetch('/api/buildSolanaTransaction', {
             method: 'POST',
             body: JSON.stringify({

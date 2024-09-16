@@ -208,7 +208,6 @@ function PayProvider({ children }: { children: React.ReactNode }) {
 
   async function decode(rawQRData: string) {
     //if it is a solana pay qrcode
-    console.log(rawQRData);
 
     if (rawQRData.substring(0, 7) === 'solana:') {
       try {
@@ -216,13 +215,6 @@ function PayProvider({ children }: { children: React.ReactNode }) {
 
         if (!isTransferRequestURL(payParams)) return;
 
-        console.log({
-          ...state,
-          to: payParams?.recipient.toString(),
-          tokenAmount: Number(payParams?.amount),
-          tokenAddress: payParams?.splToken?.toString() || '',
-          payType: 'SOLANA_PAY',
-        });
         dispatch({
           type: 'decode',
           payload: {
