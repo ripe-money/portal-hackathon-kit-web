@@ -121,7 +121,7 @@ export default function Home() {
                                 display={{ xs: 'none', md: 'block' }}
                                 fontSize={12}
                               >
-                                {token.metadata.tokenMintAddress}
+                                {token.metadata?.tokenMintAddress}
                               </Typography>
                             }
                           />
